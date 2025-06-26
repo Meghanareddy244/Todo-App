@@ -1,9 +1,31 @@
 import React, { useState } from "react";
 import TodoItem from "./TodoItem";
 
-const TodoList = ({ todos, onUpdate, onDelete }) => {
-  // Group todos by date
-  const grouped = todos.reduce((acc, todo) => {
+const TodoList = ({ todos, onUpdate, onDelete, sortBy }) => {
+  // Sort todos based on selected criteria
+  const sortTodos = (todosToSort) => {
+    return [...todosToSort].sort((a, b) => {
+      switch (sortBy) {
+        case "date":
+          return new Date(a.date) - new Date(b.date);
+        case "title":
+          return a.title.localeCompare(b.title);
+        case "completed":
+          // Sort by completion status (incomplete first, then completed)
+          if (a.completed === b.completed) {
+            // If completion status is the same, sort by date
+            return new Date(a.date) - new Date(b.date);
+          }
+          return a.completed ? 1 : -1;
+        default:
+          return 0;
+      }
+    });
+  };
+
+  // Sort todos first, then group by date
+  const sortedTodos = sortTodos(todos);
+  const grouped = sortedTodos.reduce((acc, todo) => {
     (acc[todo.date] = acc[todo.date] || []).push(todo);
     return acc;
   }, {});
@@ -23,7 +45,7 @@ const TodoList = ({ todos, onUpdate, onDelete }) => {
   return (
     <div className="w-full mt-6">
       {Object.keys(grouped)
-        // .sort()
+        .sort((a, b) => new Date(a) - new Date(b))
         .map((date) => (
           <div key={date} className="mb-6">
             <div
@@ -37,7 +59,9 @@ const TodoList = ({ todos, onUpdate, onDelete }) => {
                 </span>
               </span>
               <div className="flex items-center gap-2">
-                <span className="text-xl dark:text-white">{openGroups[date] ? "-" : "+"}</span>
+                <span className="text-xl dark:text-white">
+                  {openGroups[date] ? "-" : "+"}
+                </span>
               </div>
             </div>
             {openGroups[date] && (

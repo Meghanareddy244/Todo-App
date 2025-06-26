@@ -2,24 +2,18 @@ import React, { useState, useEffect } from "react";
 import TodoForm from "./components/TodoForm";
 import TodoList from "./components/TodoList";
 import DarkModeToggle from "./components/DarkModeToggle";
-import {
-  getTodos,
-  saveTodos,
-  addTodo,
-  updateTodo,
-  deleteTodo,
-  // clearTodosByDate,
-} from "./utils/localStorageUtils";
+import { getTodos } from "../utils/localStorage";
 
 function App() {
   const [todos, setTodos] = useState([]);
+  const [sortBy, setSortBy] = useState("date");
 
-  // useEffect(() => {
-  //   const storedTodos = getTodos();
-  //   if (storedTodos) {
-  //     setTodos(storedTodos);
-  //   }
-  // }, []);
+  useEffect(() => {
+    const storedTodos = getTodos();
+    if (storedTodos) {
+      setTodos(storedTodos);
+    }
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("todos", JSON.stringify(todos));
@@ -53,8 +47,39 @@ function App() {
         <h1 className="text-4xl font-extrabold text-blue-800 dark:text-white text-center mb-6 tracking-tight">
           TODO APP
         </h1>
+        <div className="flex flex-row gap-2 mb-6 w-full justify-center">
+          <button
+            className={`px-5 py-2 rounded-lg font-semibold text-white transition-all ${
+              sortBy === "date" ? "bg-blue-600" : "bg-blue-400 text-white"
+            }`}
+            onClick={() => setSortBy("date")}
+          >
+            Sort by Date
+          </button>
+          <button
+            className={`px-5 py-2 rounded-lg font-semibold text-white transition-all ${
+              sortBy === "title" ? "bg-blue-600" : "bg-blue-400 text-white"
+            }`}
+            onClick={() => setSortBy("title")}
+          >
+            Sort by Title
+          </button>
+          <button
+            className={`px-5 py-2 rounded-lg font-semibold text-white transition-all ${
+              sortBy === "completed" ? "bg-blue-600" : "bg-blue-400 text-white"
+            }`}
+            onClick={() => setSortBy("completed")}
+          >
+            Sort by Completed
+          </button>
+        </div>
         <TodoForm onAdd={addTodo} />
-        <TodoList todos={todos} onUpdate={updateTodo} onDelete={deleteTodo} />
+        <TodoList
+          todos={todos}
+          onUpdate={updateTodo}
+          onDelete={deleteTodo}
+          sortBy={sortBy}
+        />
       </div>
     </div>
   );
